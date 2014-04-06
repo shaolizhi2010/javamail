@@ -52,25 +52,28 @@ public class IMAPReceiveMailTest {
 		
 		// 打印不同状态的邮件数量
 		System.out.println("收件箱中共" + messages.length + "封邮件!");
-		System.out.println("收件箱中共" + folder.getUnreadMessageCount() + "封未读邮件!");
-		System.out.println("收件箱中共" + folder.getNewMessageCount() + "封新邮件!");
-		System.out.println("收件箱中共" + folder.getDeletedMessageCount() + "封已删除邮件!");
-		
-		System.out.println("------------------------开始解析邮件----------------------------------");
 		
 		// 解析邮件
 		for (Message message : messages) {
 			IMAPMessage msg = (IMAPMessage) message;
 			//String subject = MimeUtility.decodeText(msg.getSubject());
-			//String content = msg.getContent().toString();
-			POP3ReceiveMailTest.parseMessage(msg);	// 解析邮件
+			
+			StringBuffer content = new StringBuffer();
+			MailUtils.getMailTextContent(msg, content);
+			
+			System.out.println(msg.getSubject() + "--------------");
+			System.out.println(content);
+			//MailUtils.parseMessage(msg);	// 解析邮件
 			// 第二个参数如果设置为true，则将修改反馈给服务器。false则不反馈给服务器
 			msg.setFlag(Flag.SEEN, true);	//设置已读标志
+			if( System.currentTimeMillis() - msg.getReceivedDate().getTime() > 7*24*3600*1000){//大于7天
+				msg.setFlag(Flag.DELETED, true);	//设置已读标志
+			}
 			
 		}
 		
 		// 关闭资源
-		folder.close(false);
+		folder.close(true);
 		store.close();
 	}
 }
